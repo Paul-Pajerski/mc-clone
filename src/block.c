@@ -5,7 +5,6 @@
 #include <stdbool.h>
 #include <GLFW/glfw3.h>
 #include "controls.h"
-#include <conio.h>
 // gcc block.c -o block $(pkg-config --cflags --libs gtk+-3.0)
 
 bool time_to_close = true;
