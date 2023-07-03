@@ -4,10 +4,13 @@
 #include <math.h>
 #include <stdbool.h>
 #include <GLFW/glfw3.h>
+#include "controls.h"
+#include <conio.h>
 // gcc block.c -o block $(pkg-config --cflags --libs gtk+-3.0)
 
 bool time_to_close = true;
 int width, height;
+int keyPressed = -1;
 
 FILE* clean_and_open_log_file() {
     FILE* file = fopen("logs.txt", "w");
@@ -29,6 +32,32 @@ void window_close_callback(GLFWwindow* window)
 {
     if (!time_to_close)
         glfwSetWindowShouldClose(window, GLFW_FALSE);
+}
+
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+    if (action == GLFW_PRESS)
+    {   
+        
+
+        printf("Key pressed: %d\n", key);
+        print_key(key);
+        keyPressed = key;
+
+        // W = 87
+        // A = 65
+        // S = 83
+        // D = 68
+        // spacebar = 32
+        // shift = 340
+        // Escape = 256
+    }
+    else if (action == GLFW_RELEASE)
+    {
+        printf("Key released: ");
+        print_key(key);
+        keyPressed = -1;
+    }
 }
 
 void render(GLFWwindow* window)
@@ -84,7 +113,11 @@ int main(int argc, char *argv[])
 
     printf("Setting window callback\n");
     writeLog(logFile, "Setting Window Callback");
+    // Set window close callback
     glfwSetWindowCloseCallback(window, window_close_callback);
+
+    // Set up key callback
+    glfwSetKeyCallback(window, key_callback);
     glfwMakeContextCurrent(window);
     
     printf("Initialize window color\n");
@@ -95,10 +128,15 @@ int main(int argc, char *argv[])
     glfwGetFramebufferSize(window, &width, &height);
     glViewport(0, 0, width, height);
 
-
     while (!glfwWindowShouldClose(window))
     {   
         // Render the frames
+
+        if (keyPressed != -1)
+        {
+            print_key(keyPressed);
+            // printf("You are holding down key: %d\n", keyPressed);
+        }
         render(window);
     
         glfwSwapBuffers(window);
