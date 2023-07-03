@@ -1,5 +1,0 @@
-🧊 Logs for Block, a minecraft clone 🧊
-Initializing GLFW
-Creating Window
-Setting Window Callback
-Initialize window color
