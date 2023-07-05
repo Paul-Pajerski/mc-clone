@@ -3,21 +3,27 @@
 #include <stdio.h>
 #include "controls.h"
 
-void print_key(int key) {
+int print_key(int key) {
+    int x = 0, y = 0;
+
     if (key == 87) {
-        printf("%s", "Move Forward");
+        // printf("%s", "Move Forward");
+        y+=1;
     }
 
     if (key == 83) {
-        printf("%s", "Move Backwards");
+        // printf("%s", "Move Backwards");
+        y-=1;
     }
 
     if (key == 65) {
-        printf("%s", "Move Left");
+        // printf("%s", "Move Left");
+        x-=1;
     }
 
     if (key == 68) {
-        printf("%s", "Move Right");
+        // printf("%s", "Move Right");
+        x+=1;
     }
 
     if (key == 32) {
@@ -32,7 +38,10 @@ void print_key(int key) {
         printf("%s", "Escape key");
     }
 
-    printf("%s", "\n");
+    // printf("%s", "\n");
+    // x, y
+    
+   // return ;
     // printf("Hello from the second file!\n");
 }
 
