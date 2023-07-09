@@ -36,8 +36,6 @@ float upX = 0.0f;
 float upY = 1.0f; // Change to -1.0f to flip the orientation
 float upZ = 0.0f;
 
-bool isInitialCameraPositionSet = false;
-
 bool keyHeldW = false;
 bool keyHeldA = false;
 bool keyHeldS = false;
@@ -118,19 +116,8 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
         exit(EXIT_SUCCESS);
 }
 
-
 void mouseMoveCallback(GLFWwindow* window, double xpos, double ypos)
 {   
-
-    if (!isInitialCameraPositionSet)
-    {
-        // Set the initial camera position
-        initialCameraPositionX = cameraPositionX;
-        initialCameraPositionY = cameraPositionY;
-        initialCameraPositionZ = cameraPositionZ;
-        isInitialCameraPositionSet = true;
-    }
-
     // Calculate the mouse movement
     float deltaX = xpos - lastMouseX;
     float deltaY = ypos - lastMouseY;
@@ -165,11 +152,6 @@ void mouseMoveCallback(GLFWwindow* window, double xpos, double ypos)
     dirY /= length;
     dirZ /= length;
 
-    // The camera "snaps" when the mouse is first touched
-    // Not currently sure how to address this but I suspect
-    // that it's the calculations below for target x y and z
-    // not smoothly occuring after the mouse is first touched
-
     // Calculate the camera target position based on initial camera position and direction
     float distance = 1.0f; // Adjust the distance from the initial camera position
     cameraTargetX = initialCameraPositionX + dirX * distance;
@@ -177,30 +159,137 @@ void mouseMoveCallback(GLFWwindow* window, double xpos, double ypos)
     cameraTargetZ = initialCameraPositionZ + dirZ * distance;
 }
 
+
+// This code is fairly good but there are some serious issues
+// you don't exactly move in the direction you are looking
+// you mostly do but the block sorta curves when holding A or D
+// and being underneath or above the block causes some weird glitchyness
+// I suspect this is to do with the camera pitch limits
+void updateCameraPosition(float deltaTime)
+{
+    float movementSpeed = 4.0f;
+
+    // Get the camera's forward vector
+    float forwardX = cameraTargetX - cameraPositionX;
+    float forwardY = cameraTargetY - cameraPositionY;
+    float forwardZ = cameraTargetZ - cameraPositionZ;
+    float forwardLength = sqrt(forwardX * forwardX + forwardY * forwardY + forwardZ * forwardZ);
+    forwardX /= forwardLength;
+    forwardY /= forwardLength;
+    forwardZ /= forwardLength;
+
+    // Remove the vertical component of the forward vector
+    forwardY = 0.0f;
+    float forwardLengthHorizontal = sqrt(forwardX * forwardX + forwardZ * forwardZ);
+    forwardX /= forwardLengthHorizontal;
+    forwardZ /= forwardLengthHorizontal;
+
+    // Get the camera's right vector
+    float rightX = forwardZ;
+    float rightY = 0.0f;
+    float rightZ = -forwardX;
+
+    // Update camera position based on key inputs
+    if (keyHeldW)
+    {
+        cameraPositionX += forwardX * movementSpeed * deltaTime;
+        cameraPositionY += forwardY * movementSpeed * deltaTime;
+        cameraPositionZ += forwardZ * movementSpeed * deltaTime;
+    }
+    if (keyHeldS)
+    {
+        cameraPositionX -= forwardX * movementSpeed * deltaTime;
+        cameraPositionY -= forwardY * movementSpeed * deltaTime;
+        cameraPositionZ -= forwardZ * movementSpeed * deltaTime;
+    }
+    if (keyHeldD)
+    {
+        cameraPositionX -= rightX * movementSpeed * deltaTime;
+        cameraPositionY -= rightY * movementSpeed * deltaTime;
+        cameraPositionZ -= rightZ * movementSpeed * deltaTime;
+    }
+    if (keyHeldA)
+    {
+        cameraPositionX += rightX * movementSpeed * deltaTime;
+        cameraPositionY += rightY * movementSpeed * deltaTime;
+        cameraPositionZ += rightZ * movementSpeed * deltaTime;
+    }
+    if (keyHeldSpace)
+        cameraPositionY += movementSpeed * deltaTime;
+    if (keyHeldShift)
+        cameraPositionY -= movementSpeed * deltaTime;
+}
+
+// void updateCameraPosition(float deltaTime)
+// {
+//     float movementSpeed = 4.0f;
+
+//     // Get the camera's forward vector
+//     float forwardX = cameraTargetX - cameraPositionX;
+//     float forwardY = cameraTargetY - cameraPositionY;
+//     float forwardZ = cameraTargetZ - cameraPositionZ;
+//     float forwardLength = sqrt(forwardX * forwardX + forwardY * forwardY + forwardZ * forwardZ);
+//     forwardX /= forwardLength;
+//     forwardY /= forwardLength;
+//     forwardZ /= forwardLength;
+
+//     // Get the camera's right vector
+//     float rightX = forwardZ;
+//     float rightY = 0.0f;
+//     float rightZ = -forwardX;
+
+//     // Update camera position based on key inputs
+//     if (keyHeldW)
+//     {
+//         cameraPositionX += forwardX * movementSpeed * deltaTime;
+//         cameraPositionY += forwardY * movementSpeed * deltaTime;
+//         cameraPositionZ += forwardZ * movementSpeed * deltaTime;
+//     }
+//     if (keyHeldS)
+//     {
+//         cameraPositionX -= forwardX * movementSpeed * deltaTime;
+//         cameraPositionY -= forwardY * movementSpeed * deltaTime;
+//         cameraPositionZ -= forwardZ * movementSpeed * deltaTime;
+//     }
+//     if (keyHeldD)
+//     {
+//         cameraPositionX -= rightX * movementSpeed * deltaTime;
+//         cameraPositionY -= rightY * movementSpeed * deltaTime;
+//         cameraPositionZ -= rightZ * movementSpeed * deltaTime;
+//     }
+//     if (keyHeldA)
+//     {
+//         cameraPositionX += rightX * movementSpeed * deltaTime;
+//         cameraPositionY += rightY * movementSpeed * deltaTime;
+//         cameraPositionZ += rightZ * movementSpeed * deltaTime;
+//     }
+//     if (keyHeldSpace)
+//         cameraPositionY += movementSpeed * deltaTime;
+//     if (keyHeldShift)
+//         cameraPositionY -= movementSpeed * deltaTime;
+// }
+
 // TODO, update this method to be "update camera position"
 // since we don't want to be moving the cubes and instead
 // moving the camera around the cubes. This is far more efficient
-void updateCubePosition(float deltaTime)
-{
-    float movementSpeed = 4.0f;
-    
-    // This needs to be changed to move the cameras position
-    // It's too costly to move every single cube every single time
-    // the frame is rendered. Plus it's much easier to implement
-    // camera based movement
-    if (keyHeldW)
-        cubePositionZ += movementSpeed * deltaTime;
-    if (keyHeldS)
-        cubePositionZ -= movementSpeed * deltaTime;
-    if (keyHeldD)
-        cubePositionX -= movementSpeed * deltaTime;
-    if (keyHeldA)
-        cubePositionX += movementSpeed * deltaTime;
-    if (keyHeldShift)
-        cubePositionY += movementSpeed * deltaTime;
-    if (keyHeldSpace)
-        cubePositionY -= movementSpeed * deltaTime;
-}
+// void updateCubePosition(float deltaTime)
+// {
+//     float movementSpeed = 4.0f;
+
+//     // Update camera position based on key inputs
+//     if (keyHeldW)
+//         cameraPositionZ -= movementSpeed * deltaTime;
+//     if (keyHeldS)
+//         cameraPositionZ += movementSpeed * deltaTime;
+//     if (keyHeldA)
+//         cameraPositionX -= movementSpeed * deltaTime;
+//     if (keyHeldD)
+//         cameraPositionX += movementSpeed * deltaTime;
+//     if (keyHeldSpace)
+//         cameraPositionY += movementSpeed * deltaTime;
+//     if (keyHeldShift)
+//         cameraPositionY -= movementSpeed * deltaTime;
+// }
 
 // This method should eventually have parameters to
 // color the cube correct and give it a correct design
@@ -286,11 +375,10 @@ void render(GLFWwindow* window)
     // Set the modelview matrix
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    gluLookAt(cameraPositionX, cameraPositionY, cameraPositionZ,
-              cameraTargetX, cameraTargetY, cameraTargetZ,
-              upX, upY, upZ);
 
-    // printf("%d %d %d\n", cameraTargetX, cameraTargetY, cameraTargetZ);
+    gluLookAt(cameraPositionX, cameraPositionY, cameraPositionZ,
+          cameraPositionX + cameraTargetX, cameraPositionY + cameraTargetY, cameraPositionZ + cameraTargetZ,
+          upX, upY, upZ);
     
     // Translate the cube based on its position
     // This should probably be removed and changed to update the 
@@ -299,7 +387,7 @@ void render(GLFWwindow* window)
     // where instead of editing the cubes position as done below
     // you edit the cameras position. This would allow for dynamic movement
     // in the mouses direction
-    glTranslatef(cubePositionX, cubePositionY, cubePositionZ);
+    // glTranslatef(cubePositionX, cubePositionY, cubePositionZ);
     
     // This should eventually be expanded on to render multiple cubes
     // Use 3d space and cube offset to do this. Iterate through the cubes
@@ -325,6 +413,16 @@ void initialize_context_and_callbacks(GLFWwindow* window)
     
     // Use Cursor and hide it
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+    // Set background color (sky blue)
+    glClearColor(0.529f, 0.808f, 0.922f, 1.0f);
+
+    // This call is necessary to prevent the mouse from snapping
+    // the first time a movement is made. It's technically a hack
+    // but I could not find a better way to do this since editing
+    // the starting coordinates of the camera view seemed to ruin
+    // everything
+    mouseMoveCallback(window, 0.0f, 0.0f);
 }
 
 int main()
@@ -339,7 +437,7 @@ int main()
     
     printf("Creating window\n");
     writeLog(logFile, "Creating Window");
-    GLFWwindow* window = glfwCreateWindow(800, 600, "Cube Movement", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(1000, 800, "Cube Movement", NULL, NULL);
     if (!window)
     {
         glfwTerminate();
@@ -347,10 +445,11 @@ int main()
     }
     
     initialize_context_and_callbacks(window);
+
+
     printf("Initialize window color\n");
     writeLog(logFile, "Initialize window color");
-    // Set background color (sky blue)
-    glClearColor(0.529f, 0.808f, 0.922f, 1.0f);
+    
     
     double previousTime = glfwGetTime();
     
@@ -363,7 +462,8 @@ int main()
         glfwGetFramebufferSize(window, &width, &height);
         glViewport(0, 0, width, height);
         
-        updateCubePosition(deltaTime);
+        // updateCubePosition(deltaTime);
+        updateCameraPosition(deltaTime);
         
         render(window);
         
