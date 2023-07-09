@@ -1,5 +1,46 @@
 // Some code working on getting camera angles correct
 
+// void mouseMoveCallback(GLFWwindow* window, double xpos, double ypos)
+// {
+//     // Calculate the mouse movement
+//     float deltaX = xpos - lastMouseX;
+//     float deltaY = ypos - lastMouseY;
+
+//     // Update the last mouse position
+//     lastMouseX = xpos;
+//     lastMouseY = ypos;
+
+//     // Update the camera angles based on mouse movement
+//     const float sensitivity = 0.01f; // Adjust sensitivity here
+//     cameraYaw += deltaX * sensitivity;
+//     cameraPitch -= deltaY * sensitivity; // Invert the pitch calculation
+
+//     // Clamp the camera pitch to avoid flipping
+//     if (cameraPitch > 89.0f)
+//         cameraPitch = 89.0f;
+//     if (cameraPitch < -89.0f)
+//         cameraPitch = -89.0f;
+
+//     // Convert camera angles to radians
+//     float yawRadians = cameraYaw * 3.14159f / 180.0f;
+//     float pitchRadians = cameraPitch * 3.14159f / 180.0f;
+
+//     // Calculate the camera direction
+//     float dirX = cos(yawRadians) * cos(pitchRadians);
+//     float dirY = sin(pitchRadians);
+//     float dirZ = sin(yawRadians) * cos(pitchRadians);
+
+//     // Normalize the camera direction
+//     float length = sqrt(dirX * dirX + dirY * dirY + dirZ * dirZ);
+//     dirX /= length;
+//     dirY /= length;
+//     dirZ /= length;
+
+//     // Calculate the camera target position based on initial camera position and direction
+//     cameraTargetX = initialCameraPositionX + dirX;
+//     cameraTargetY = initialCameraPositionY + dirY;
+//     cameraTargetZ = initialCameraPositionZ + dirZ;
+// }
 
 // // Camera variables
 // float cameraYaw = 0.0f;   // Yaw angle of the camera
@@ -1084,4 +1125,46 @@
 //     glfwDestroyWindow(window);
 //     glfwTerminate();
 //     return EXIT_SUCCESS;
+// }
+
+// void mouseMoveCallback(GLFWwindow* window, double xpos, double ypos)
+// {
+//     // Calculate the mouse movement
+//     float deltaX = xpos - lastMouseX;
+//     float deltaY = ypos - lastMouseY;
+
+//     // Update the last mouse position
+//     lastMouseX = xpos;
+//     lastMouseY = ypos;
+
+//     // Update the camera angles based on mouse movement
+//     const float sensitivity = 0.01f; // Adjust sensitivity here
+//     cameraYaw += deltaX * sensitivity;
+//     cameraPitch -= deltaY * sensitivity; // Invert the pitch calculation
+
+//     // Clamp the camera pitch to avoid flipping
+//     if (cameraPitch > 89.0f)
+//         cameraPitch = 89.0f;
+//     if (cameraPitch < -89.0f)
+//         cameraPitch = -89.0f;
+
+//     // Convert camera angles to radians
+//     float yawRadians = cameraYaw * 3.14159f / 180.0f;
+//     float pitchRadians = cameraPitch * 3.14159f / 180.0f;
+
+//     // Calculate the camera direction
+//     float dirX = cos(yawRadians) * cos(pitchRadians);
+//     float dirY = sin(pitchRadians);
+//     float dirZ = sin(yawRadians) * cos(pitchRadians);
+
+//     // Normalize the camera direction
+//     float length = sqrt(dirX * dirX + dirY * dirY + dirZ * dirZ);
+//     dirX /= length;
+//     dirY /= length;
+//     dirZ /= length;
+
+//     // Calculate the camera target position based on initial camera position and direction
+//     cameraTargetX = initialCameraPositionX + dirX;
+//     cameraTargetY = initialCameraPositionY + dirY;
+//     cameraTargetZ = initialCameraPositionZ + dirZ;
 // }
