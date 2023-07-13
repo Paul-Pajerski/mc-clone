@@ -12,43 +12,30 @@
 // This is the initial position of this test cube
 // this places the cube infront of us when we start
 float cubeSize = 0.6f;          // Size of the cube
+float cubePositionX = 0.0f;     // X position of the cube
+float cubePositionY = 0.0f;     // Y position of the cube
+float cubePositionZ = 0.0f;    // Z position of the cube
 
-// Width, height and aspect ratio of the window
-int width, height;
-float aspectRatio = 0.0f;
+// This is for the mouse variables
+float lastMouseX = 0.0f;
+float lastMouseY = 0.0f;
+float cameraYaw = 0.0f;
+float cameraPitch = 0.0f;
 
-// Camera variables
-float cameraYaw = 0.0f;   // Yaw angle of the camera
-float cameraPitch = 0.0f; // Pitch angle of the camera
-float cameraDistance = 10.0f; // Distance of the camera from the cube
-float lastMouseX = 0.0f; // Mouse position X
-float lastMouseY = 0.0f; // Mouse position Y
-float yawRadians = 0.0f; // Yaw in rads for the mouse pos
-float pitchRadians = 0.0f; // Pitch in rads for the mouse pos
-float mouseDeltaX; // Difference between the mouse position and the Xpos
-float mouseDeltaY; // Difference between the mouse position and the Ypos
-float cameraDirX = 0.0f; // Camera direction X
-float cameraDirY = 0.0f; // Camera direction Y
-float cameraDirZ = 0.0f; // Camera direction Z
-float cameraLength = 0.0f; // Camera length from target, normalized
-float forwardX = 0.0f; // Normalized forward X vector for target
-float forwardY = 0.0f; // Normalized forward Y vector for target
-float forwardZ = 0.0f; // Normalized forward Z vector for target
-float forwardLength = 0.0f; // Camera forward length
-float sensitivity = 0.008f; // Camera angle sensitivity
-float currentCameraPositionX = -5.0f; // Current X coord for camera
-float currentCameraPositionY = 0.0f; // Current Y coord for camera
-float currentCameraPositionZ = 0.0f; // Current Z coord for camera
+// Global camera variables
+float initialCameraPositionX = 0.0f;
+float initialCameraPositionY = 0.0f;
+float initialCameraPositionZ = 0.0f;
+float cameraPositionX = 0.0f;
+float cameraPositionY = 0.0f;
+float cameraPositionZ = 0.0f;
+float cameraTargetX = 0.0f;
+float cameraTargetY = 0.0f;
+float cameraTargetZ = -1.0f;
+float upX = 0.0f;
+float upY = 1.0f; // Change to -1.0f to flip the orientation
+float upZ = 0.0f;
 
-// Glu Look At vars
-float upX = 0.0f; // X up vector
-float upY = 1.0f; // Change to -1.0f to flip the orientation (default is Y)
-float upZ = 0.0f; // X up vector
-
-// Movement key vars
-float movementSpeed = 0.004f; // Ingame movement speed
-
-// Various booleans for what keys are being held down
 bool keyHeldW = false;
 bool keyHeldA = false;
 bool keyHeldS = false;
@@ -80,6 +67,9 @@ int exit_block(FILE* logFile, GLFWwindow* window) {
 
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
+    // Adjust the cube position based on key presses
+    float movementSpeed = 0.1f;
+    
     if (key == GLFW_KEY_W)
     {
         if (action == GLFW_PRESS)
@@ -129,16 +119,17 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 void mouseMoveCallback(GLFWwindow* window, double xpos, double ypos)
 {   
     // Calculate the mouse movement
-    mouseDeltaX = xpos - lastMouseX;
-    mouseDeltaY= ypos - lastMouseY;
+    float deltaX = xpos - lastMouseX;
+    float deltaY = ypos - lastMouseY;
 
     // Update the last mouse position
     lastMouseX = xpos;
     lastMouseY = ypos;
 
     // Update the camera angles based on mouse movement
-    cameraYaw += mouseDeltaX * sensitivity;
-    cameraPitch -= mouseDeltaY * sensitivity; // Invert the pitch calculation
+    const float sensitivity = 0.01f; // Adjust sensitivity here
+    cameraYaw += deltaX * sensitivity;
+    cameraPitch -= deltaY * sensitivity; // Invert the pitch calculation
 
     // Clamp the camera pitch to avoid flipping
     if (cameraPitch > 89.0f)
@@ -147,60 +138,158 @@ void mouseMoveCallback(GLFWwindow* window, double xpos, double ypos)
         cameraPitch = -89.0f;
 
     // Convert camera angles to radians
-    yawRadians = cameraYaw * pi_val / 180.0f;
-    pitchRadians = cameraPitch * pi_val / 180.0f;
+    float yawRadians = cameraYaw * 3.14159f / 180.0f;
+    float pitchRadians = cameraPitch * 3.14159f / 180.0f;
 
     // Calculate the camera direction
-    cameraDirX = cos(yawRadians) * cos(pitchRadians);
-    cameraDirY = sin(pitchRadians);
-    cameraDirZ = sin(yawRadians) * cos(pitchRadians);
+    float dirX = cos(yawRadians) * cos(pitchRadians);
+    float dirY = sin(pitchRadians);
+    float dirZ = sin(yawRadians) * cos(pitchRadians);
 
     // Normalize the camera direction
-    cameraLength = sqrt(cameraDirX * cameraDirX + cameraDirY * cameraDirY + cameraDirZ * cameraDirZ);
-    cameraDirX /= cameraLength;
-    cameraDirY /= cameraLength;
-    cameraDirZ /= cameraLength;
+    float length = sqrt(dirX * dirX + dirY * dirY + dirZ * dirZ);
+    dirX /= length;
+    dirY /= length;
+    dirZ /= length;
+
+    // Calculate the camera target position based on initial camera position and direction
+    float distance = 1.0f; // Adjust the distance from the initial camera position
+    cameraTargetX = initialCameraPositionX + dirX * distance;
+    cameraTargetY = initialCameraPositionY + dirY * distance;
+    cameraTargetZ = initialCameraPositionZ + dirZ * distance;
 }
 
-void updateCameraPosition()
-{
-    // Calculate the camera's forward vector
-    forwardX = cameraDirX;
-    forwardY = 0.0f;
-    forwardZ = cameraDirZ;
 
-    // Normalize the forward vector
-    forwardLength = sqrt(forwardX * forwardX + forwardY * forwardY + forwardZ * forwardZ);
+// This code is fairly good but there are some serious issues
+// you don't exactly move in the direction you are looking
+// you mostly do but the block sorta curves when holding A or D
+// and being underneath or above the block causes some weird glitchyness
+// I suspect this is to do with the camera pitch limits
+void updateCameraPosition(float deltaTime)
+{
+    float movementSpeed = 4.0f;
+
+    // Get the camera's forward vector
+    float forwardX = cameraTargetX - cameraPositionX;
+    float forwardY = cameraTargetY - cameraPositionY;
+    float forwardZ = cameraTargetZ - cameraPositionZ;
+    float forwardLength = sqrt(forwardX * forwardX + forwardY * forwardY + forwardZ * forwardZ);
     forwardX /= forwardLength;
     forwardY /= forwardLength;
     forwardZ /= forwardLength;
-    
+
+    // Remove the vertical component of the forward vector
+    forwardY = 0.0f;
+    float forwardLengthHorizontal = sqrt(forwardX * forwardX + forwardZ * forwardZ);
+    forwardX /= forwardLengthHorizontal;
+    forwardZ /= forwardLengthHorizontal;
+
+    // Get the camera's right vector
+    float rightX = forwardZ;
+    float rightY = 0.0f;
+    float rightZ = -forwardX;
+
     // Update camera position based on key inputs
-    if (keyHeldW) {
-        currentCameraPositionX += forwardX * movementSpeed;
-        currentCameraPositionZ += forwardZ * movementSpeed;
+    if (keyHeldW)
+    {
+        cameraPositionX += forwardX * movementSpeed * deltaTime;
+        cameraPositionY += forwardY * movementSpeed * deltaTime;
+        cameraPositionZ += forwardZ * movementSpeed * deltaTime;
     }
-
-    if (keyHeldS) {
-        currentCameraPositionX -= forwardX * movementSpeed;
-        currentCameraPositionZ -= forwardZ * movementSpeed;
+    if (keyHeldS)
+    {
+        cameraPositionX -= forwardX * movementSpeed * deltaTime;
+        cameraPositionY -= forwardY * movementSpeed * deltaTime;
+        cameraPositionZ -= forwardZ * movementSpeed * deltaTime;
     }
-
-    if (keyHeldA) {
-        currentCameraPositionX += forwardZ * movementSpeed;
-        currentCameraPositionZ -= forwardX * movementSpeed;
+    if (keyHeldD)
+    {
+        cameraPositionX -= rightX * movementSpeed * deltaTime;
+        cameraPositionY -= rightY * movementSpeed * deltaTime;
+        cameraPositionZ -= rightZ * movementSpeed * deltaTime;
     }
-
-    if (keyHeldD) {
-        currentCameraPositionX -= forwardZ * movementSpeed;
-        currentCameraPositionZ += forwardX * movementSpeed;
+    if (keyHeldA)
+    {
+        cameraPositionX += rightX * movementSpeed * deltaTime;
+        cameraPositionY += rightY * movementSpeed * deltaTime;
+        cameraPositionZ += rightZ * movementSpeed * deltaTime;
     }
-
     if (keyHeldSpace)
-        currentCameraPositionY += movementSpeed;
+        cameraPositionY += movementSpeed * deltaTime;
     if (keyHeldShift)
-        currentCameraPositionY -= movementSpeed;
+        cameraPositionY -= movementSpeed * deltaTime;
 }
+
+// void updateCameraPosition(float deltaTime)
+// {
+//     float movementSpeed = 4.0f;
+
+//     // Get the camera's forward vector
+//     float forwardX = cameraTargetX - cameraPositionX;
+//     float forwardY = cameraTargetY - cameraPositionY;
+//     float forwardZ = cameraTargetZ - cameraPositionZ;
+//     float forwardLength = sqrt(forwardX * forwardX + forwardY * forwardY + forwardZ * forwardZ);
+//     forwardX /= forwardLength;
+//     forwardY /= forwardLength;
+//     forwardZ /= forwardLength;
+
+//     // Get the camera's right vector
+//     float rightX = forwardZ;
+//     float rightY = 0.0f;
+//     float rightZ = -forwardX;
+
+//     // Update camera position based on key inputs
+//     if (keyHeldW)
+//     {
+//         cameraPositionX += forwardX * movementSpeed * deltaTime;
+//         cameraPositionY += forwardY * movementSpeed * deltaTime;
+//         cameraPositionZ += forwardZ * movementSpeed * deltaTime;
+//     }
+//     if (keyHeldS)
+//     {
+//         cameraPositionX -= forwardX * movementSpeed * deltaTime;
+//         cameraPositionY -= forwardY * movementSpeed * deltaTime;
+//         cameraPositionZ -= forwardZ * movementSpeed * deltaTime;
+//     }
+//     if (keyHeldD)
+//     {
+//         cameraPositionX -= rightX * movementSpeed * deltaTime;
+//         cameraPositionY -= rightY * movementSpeed * deltaTime;
+//         cameraPositionZ -= rightZ * movementSpeed * deltaTime;
+//     }
+//     if (keyHeldA)
+//     {
+//         cameraPositionX += rightX * movementSpeed * deltaTime;
+//         cameraPositionY += rightY * movementSpeed * deltaTime;
+//         cameraPositionZ += rightZ * movementSpeed * deltaTime;
+//     }
+//     if (keyHeldSpace)
+//         cameraPositionY += movementSpeed * deltaTime;
+//     if (keyHeldShift)
+//         cameraPositionY -= movementSpeed * deltaTime;
+// }
+
+// TODO, update this method to be "update camera position"
+// since we don't want to be moving the cubes and instead
+// moving the camera around the cubes. This is far more efficient
+// void updateCubePosition(float deltaTime)
+// {
+//     float movementSpeed = 4.0f;
+
+//     // Update camera position based on key inputs
+//     if (keyHeldW)
+//         cameraPositionZ -= movementSpeed * deltaTime;
+//     if (keyHeldS)
+//         cameraPositionZ += movementSpeed * deltaTime;
+//     if (keyHeldA)
+//         cameraPositionX -= movementSpeed * deltaTime;
+//     if (keyHeldD)
+//         cameraPositionX += movementSpeed * deltaTime;
+//     if (keyHeldSpace)
+//         cameraPositionY += movementSpeed * deltaTime;
+//     if (keyHeldShift)
+//         cameraPositionY -= movementSpeed * deltaTime;
+// }
 
 // This method should eventually have parameters to
 // color the cube correct and give it a correct design
@@ -272,11 +361,10 @@ void create_cube()
 
 void render(GLFWwindow* window)
 {
-    aspectRatio = (float)width / (float)height;
-    // The aspect ratio shouldn't be calculated in the render loop
-    // instead only calcuate at the start of the game
-    // and only update it when the user changes the window size
-
+    int width, height;
+    glfwGetFramebufferSize(window, &width, &height);
+    float aspectRatio = (float)width / (float)height;
+    
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
     // Set up the projection matrix
@@ -287,13 +375,10 @@ void render(GLFWwindow* window)
     // Set the modelview matrix
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    
-    updateCameraPosition();
 
-    gluLookAt(currentCameraPositionX, currentCameraPositionY, currentCameraPositionZ,
-             currentCameraPositionX + cameraDirX, currentCameraPositionY + cameraDirY, currentCameraPositionZ + cameraDirZ,
-            upX, upY, upZ);
-
+    gluLookAt(cameraPositionX, cameraPositionY, cameraPositionZ,
+          cameraPositionX + cameraTargetX, cameraPositionY + cameraTargetY, cameraPositionZ + cameraTargetZ,
+          upX, upY, upZ);
     
     // Translate the cube based on its position
     // This should probably be removed and changed to update the 
@@ -352,7 +437,7 @@ int main()
     
     printf("Creating window\n");
     writeLog(logFile, "Creating Window");
-    GLFWwindow* window = glfwCreateWindow(1200, 800, "Cube Movement", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(1000, 800, "Cube Movement", NULL, NULL);
     if (!window)
     {
         glfwTerminate();
@@ -360,15 +445,31 @@ int main()
     }
     
     initialize_context_and_callbacks(window);
+
+
     printf("Initialize window color\n");
     writeLog(logFile, "Initialize window color");
     
+    
+    double previousTime = glfwGetTime();
+    
     while (!glfwWindowShouldClose(window))
     {
+        double currentTime = glfwGetTime();
+        float deltaTime = (float)(currentTime - previousTime);
+        
+        int width, height;
         glfwGetFramebufferSize(window, &width, &height);
         glViewport(0, 0, width, height);
+        
+        // updateCubePosition(deltaTime);
+        updateCameraPosition(deltaTime);
+        
         render(window);
+        
         glfwPollEvents();
+        
+        previousTime = currentTime;
     }
     
     glfwTerminate();
