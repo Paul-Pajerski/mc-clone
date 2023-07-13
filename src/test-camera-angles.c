@@ -1,5 +1,138 @@
 // Some code working on getting camera angles correct
 
+
+// // This is for the mouse variables
+// float lastMouseX = 0.0f;
+// float lastMouseY = 0.0f;
+// float cameraYaw = 0.0f;
+// float cameraPitch = 0.0f;
+
+// // Global camera variables
+// float initialCameraPositionX = 0.0f;
+// float initialCameraPositionY = 0.0f;
+// float initialCameraPositionZ = 0.0f;
+// float cameraPositionX = 0.0f;
+// float cameraPositionY = 0.0f;
+// float cameraPositionZ = 0.0f;
+// float cameraTargetX = 0.0f;
+// float cameraTargetY = 0.0f;
+// float cameraTargetZ = -1.0f;
+// printf("Pointing From X=%f Y=%f Z=%f \n", currentCameraPositionX, currentCameraPositionY, currentCameraPositionZ);
+    // printf("Pointing   to X=%f Y=%f Z=%f \n", currentCameraPositionX + cameraDirX, currentCameraPositionY + cameraDirY, currentCameraPositionZ + cameraDirZ);
+    // printf("%f\n", cameraPitch);
+    // /printf("X=%f Y=%f Z=%f \n", currentMousePositionX, currentMousePositionY, currentMousePositionZ);
+    // printf("YAW=%f PITCH=%f \n", yawRadians, pitchRadians);
+    // printf("X=%f Y=%f Z=%f \n", cameraDirX, cameraDirY, cameraDirZ);
+    // printf("%d", keyHeldD);
+
+    // glBegin(GL_LINES);
+    // glVertex3f(-0.815801, -1.719999, -1.038308);
+    // glVertex3f(-0.142918, -0.719999, -0.298559);
+    // glEnd();
+
+    // glBegin(GL_LINES);
+    // glVertex3f(-0.815801, -1.719999, -1.038308);
+    // glVertex3f(-0.142918, 2.719999, -0.298559);
+    // glEnd();
+
+    // gluLookAt(cameraPositionX, cameraPositionY, cameraPositionZ,
+    //       cameraPositionX + cameraTargetX, cameraPositionY + cameraTargetY, cameraPositionZ + cameraTargetZ,
+    //       upX, upY, upZ);
+    // if (keyHeldW) {
+    //     currentCameraPositionX += cameraDirX * movementSpeed;
+    //     currentCameraPositionZ += cameraDirZ * movementSpeed;
+    // }
+    
+    // if (keyHeldS) {
+    //     currentCameraPositionX -= cameraDirX * movementSpeed;
+    //     currentCameraPositionZ -= cameraDirZ * movementSpeed;
+    // }
+    // if (keyHeldD) {
+    //     currentCameraPositionX -= cameraDirZ * movementSpeed;
+    //     currentCameraPositionZ += cameraDirX * movementSpeed;
+    // }
+    // if (keyHeldA) {
+    //     currentCameraPositionX += cameraDirZ * movementSpeed;
+    //     currentCameraPositionZ -= cameraDirX * movementSpeed;
+    // }
+
+    // if (keyHeldSpace)
+    //     currentCameraPositionY += movementSpeed;
+    // if (keyHeldShift)
+    //     currentCameraPositionY -= movementSpeed;
+
+ // // Get the camera's forward vector
+    // float forwardX = cameraTargetX - cameraPositionX;
+    // float forwardY = cameraTargetY - cameraPositionY;
+    // float forwardZ = cameraTargetZ - cameraPositionZ;
+    // float forwardLength = sqrt(forwardX * forwardX + forwardY * forwardY + forwardZ * forwardZ);
+    // forwardX /= forwardLength;
+    // forwardY /= forwardLength;
+    // forwardZ /= forwardLength;
+
+    // // Remove the vertical component of the forward vector
+    // forwardY = 0.0f;
+    // float forwardLengthHorizontal = sqrt(forwardX * forwardX + forwardZ * forwardZ);
+    // forwardX /= forwardLengthHorizontal;
+    // forwardZ /= forwardLengthHorizontal;
+
+    // // Get the camera's right vector
+    // float rightX = forwardZ;
+    // float rightY = 0.0f;
+    // float rightZ = -forwardX;
+
+    // // Update camera position based on key inputs
+// figure out where the camera is looking, and move in that direction
+
+    // // Normalize the camera direction
+    // float length = sqrt(dirX * dirX + dirY * dirY + dirZ * dirZ);
+    // dirX /= length;
+    // dirY /= length;
+    // dirZ /= length;
+
+    // // Calculate the camera target position based on initial camera position and direction
+    // float distance = 1.0f; // Adjust the distance from the initial camera position
+    // cameraTargetX = initialCameraPositionX + dirX * distance;
+    // cameraTargetY = initialCameraPositionY + dirY * distance;
+    // cameraTargetZ = initialCameraPositionZ + dirZ * distance;
+ // // Calculate the mouse movement
+    // deltaX = xpos - lastMouseX;
+    // deltaY = ypos - lastMouseY;
+
+    // // Update the last mouse position
+    // lastMouseX = xpos;
+    // lastMouseY = ypos;
+
+    // // Update the camera angles based on mouse movement
+    
+
+    // cameraYaw += deltaX * sensitivity;
+    // cameraPitch -= deltaY * sensitivity; // Invert the pitch calculation
+
+    // // Clamp the camera pitch to avoid flipping
+    
+    // // if (cameraPitch > 89.0f)
+    // //     cameraPitch = 89.0f;
+    // // if (cameraPitch < -89.0f)
+    // //     cameraPitch = -89.0f;
+    // if (cameraPitch > 90.0f)
+    //     cameraPitch = 90.0f;
+    // if (cameraPitch < -90.0f)
+    //     cameraPitch = -90.0f;
+
+
+    // // // Convert camera angles to radians
+    // yawRadians = cameraYaw * 3.14159f / 180.0f;
+    // pitchRadians = cameraPitch * 3.14159f / 180.0f;
+
+    // // Calculate the camera direction
+    // // cameraDirX = cos(yawRadians) * cos(pitchRadians);
+    // // cameraDirY = sin(pitchRadians);
+    // // cameraDirZ = sin(yawRadians) * cos(pitchRadians);
+    // cameraDirX = cos(yawRadians);
+    // cameraDirY = sin(pitchRadians);
+    // cameraDirZ = sin(yawRadians);
+
 // void mouseMoveCallback(GLFWwindow* window, double xpos, double ypos)
 // {
 //     // Calculate the mouse movement
